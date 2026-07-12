@@ -1,0 +1,134 @@
+*lvim-breadcrumbs.txt*    The symbol path from the document root to the cursor
+
+==============================================================================
+CONTENTS                                              *lvim-breadcrumbs*
+
+  1. Introduction ........................... |lvim-breadcrumbs-intro|
+  2. Setup .................................. |lvim-breadcrumbs-setup|
+  3. API .................................... |lvim-breadcrumbs-api|
+  4. lvim-hud winbar segment ................ |lvim-breadcrumbs-hud|
+  5. Self-rendered winbar ................... |lvim-breadcrumbs-winbar|
+  6. Highlights ............................. |lvim-breadcrumbs-highlights|
+  7. Health ................................. |lvim-breadcrumbs-health|
+
+==============================================================================
+1. INTRODUCTION                                 *lvim-breadcrumbs-intro*
+
+lvim-breadcrumbs answers "where am I in the code": the symbol path from the
+document root to the cursor (`module ➤ class ➤ method`), fed by LSP
+textDocument/documentSymbol with a treesitter fallback, exposed as DATA for
+statusline/winbar consumers plus an optional self-rendered winbar.
+
+Data discipline: the symbol tree is cached per buffer — hierarchical
+DocumentSymbol[] preferred, flat SymbolInformation[] upconverted by range
+containment. A request is issued once per EDIT (debounced TextChanged /
+InsertLeave; the in-flight request is cancelled before the next fires), never
+per cursor move — cursor moves only binary-search the cached ranges into the
+ancestor chain.
+
+Buffers with no documentSymbol client fall back to the treesitter parser
+tree: the structural named-node ancestors (function / method / class / struct
+/ enum / interface / module / field) in the same output shape.
+
+==============================================================================
+2. SETUP                                        *lvim-breadcrumbs-setup*
+
+The full default configuration: >lua
+  require("lvim-breadcrumbs").setup({
+      refresh_ms = 300,            -- edit-debounce (ms) for the re-request
+      depth_limit = 0,             -- keep the deepest n segments; 0 = all
+      depth_limit_indicator = "…", -- elision marker for the dropped head
+      file_prefix = true,          -- lead with `icon filename` (lvim-icons)
+      attach_winbar = false,       -- self-rendered winbar (opt-in)
+      exclude_ft = {},             -- filetypes never attached
+      ts_fallback = true,          -- treesitter chain when no LSP symbols
+  })
+<
+setup() installs an LspAttach autocmd that attaches every documentSymbol-
+capable client automatically (clients that started earlier are swept), so no
+per-server wiring is needed. The manual seam for an on_attach handler: >lua
+  require("lvim-breadcrumbs").attach(client, bufnr)
+<
+==============================================================================
+3. API                                          *lvim-breadcrumbs-api*
+
+                                                *lvim-breadcrumbs.is_available()*
+is_available({bufnr})
+    A chain can be produced for the buffer: an attached client's tree is
+    cached, or the treesitter fallback has a parser.
+
+                                                *lvim-breadcrumbs.get_data()*
+get_data({bufnr})
+    The ancestor chain at the buffer's cursor, root first — the STABLE seam
+    every consumer builds on. Each entry: `name`, `kind` (LSP SymbolKind
+    number), `type` (kind name, e.g. "Function"), `icon` (the kind glyph),
+    `hl` (`LvimBreadcrumbs<KindName>`), `scope_range` (the symbol's full
+    range) and `jump` (the selection start). Returns nil when no source can
+    produce a chain.
+
+                                                *lvim-breadcrumbs.get_location()*
+get_location({opts})
+    The rendered `➤`-separated trail as a statusline-format string. {opts}
+    (each defaulting to its config value where one exists): `bufnr`,
+    `highlight` (embed `%#…#` groups, default true), `clicks` (wrap segments
+    in `%N@…@` jump regions — winbar renderers only, default false),
+    `file_prefix`, `depth_limit`, `depth_limit_indicator`.
+
+                                                *lvim-breadcrumbs.attach()*
+attach({client}, {bufnr})
+    Wire a documentSymbol client to a buffer (idempotent, capability-
+    checked). Done automatically on LspAttach once setup() ran.
+
+                                                *lvim-breadcrumbs.hud_segment()*
+hud_segment({opts})
+    A ready-made lvim-hud chrome winbar SEGMENT spec — see
+    |lvim-breadcrumbs-hud|.
+
+==============================================================================
+4. LVIM-HUD WINBAR SEGMENT                      *lvim-breadcrumbs-hud*
+
+With the lvim-hud chrome winbar, wire the breadcrumb in as a SEGMENT — one
+line in the winbar's segment list: >lua
+  segments[#segments + 1] = require("lvim-breadcrumbs").hud_segment()
+<
+The segment renders in active windows, follows the cursor on every redraw,
+and each symbol is clickable (jumps to its definition). {opts}: `name`
+(segment cache key, default "wb_breadcrumbs"), `inactive` (render in inactive
+windows too), `file_prefix` (prepend the file icon + name — off by default
+here, a chrome winbar already has its own file segment).
+
+This is the recommended integration with lvim-hud; the self-rendered winbar
+below is the standalone alternative.
+
+==============================================================================
+5. SELF-RENDERED WINBAR                         *lvim-breadcrumbs-winbar*
+
+`attach_winbar = true` sets a window-local 'winbar' on every window showing
+an attached buffer — the same clickable trail, with the `file_prefix` lead.
+It only ever writes over an EMPTY winbar (or its own), so a winbar owned by
+lvim-hud or any other plugin is never clobbered; on detach it only clears its
+own.
+
+==============================================================================
+6. HIGHLIGHTS                                   *lvim-breadcrumbs-highlights*
+
+All groups derive from the lvim-utils palette and re-theme on colorscheme /
+palette change. One `LvimBreadcrumbs<KindName>` group per LSP SymbolKind
+(LvimBreadcrumbsFunction, LvimBreadcrumbsClass, …), coloured with the same
+accent-per-kind mapping lvim-lsp's outline uses, plus:
+
+  LvimBreadcrumbsSeparator   the `➤` separators and the `…` elision
+  LvimBreadcrumbsFile        the `file_prefix` filename
+
+The kind glyphs are the same set as lvim-lsp's outline — read live from
+lvim-lsp when it is installed, bundled otherwise.
+
+==============================================================================
+7. HEALTH                                       *lvim-breadcrumbs-health*
+
+`:checkhealth lvim-breadcrumbs` reports the symbol source of the current
+buffer (LSP tree / treesitter fallback / none), the kind-icon source (shared
+lvim-lsp table vs the bundled copy, with a drift warning), the optional
+dependencies and the winbar mode.
+
+vim:tw=78:ts=8:noet:ft=help:norl:
