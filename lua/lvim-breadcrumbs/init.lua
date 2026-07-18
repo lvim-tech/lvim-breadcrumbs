@@ -29,7 +29,6 @@ local winbar = require("lvim-breadcrumbs.winbar")
 local merge = require("lvim-utils.utils").merge
 
 local api = vim.api
-local ms = vim.lsp.protocol.Methods
 
 local M = {}
 
@@ -184,6 +183,13 @@ function M.setup(opts)
             if config.attach_winbar and lsp.buffers[args.buf] then
                 winbar.apply(args.buf)
             end
+        end,
+    })
+    api.nvim_create_autocmd({ "BufDelete", "BufWipeout" }, {
+        group = group,
+        desc = "lvim-breadcrumbs: drop the treesitter-fallback chain memo for a gone buffer",
+        callback = function(args)
+            ts.forget(args.buf)
         end,
     })
 

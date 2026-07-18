@@ -16,6 +16,23 @@ local kinds = require("lvim-breadcrumbs.kinds")
 
 local M = {}
 
+--- Per-buffer memo of the last computed chain. `M.chain` runs per winbar/statusline redraw (and
+--- redraws are frequent — mode changes, focus, `:redrawstatus`), but its inputs only change on an
+--- edit or a cursor move; caching gives the treesitter fallback the same "compute once per (edit,
+--- cursor)" the LSP path already gets from `locate.update`. Keyed by `changedtick` + cursor, so any
+--- edit or move rebuilds; entries are dropped on buffer wipe/delete via `M.forget` (wired from
+--- `init.register`). Only successful results are cached — the transient no-parser state (the parser
+--- can be installed on demand without bumping `changedtick`) always re-probes.
+---@type table<integer, { tick: integer, line: integer, col: integer, chain: LvimBreadcrumbsEntry[] }>
+local cache = {}
+
+--- Drop a buffer's memoized chain (on BufDelete / BufWipeout).
+---@param bufnr integer
+---@return nil
+function M.forget(bufnr)
+    cache[bufnr] = nil
+end
+
 --- Exact node-type → SymbolKind name, for grammar names the patterns below can't catch.
 ---@type table<string, string>
 local EXACT = {
@@ -103,6 +120,11 @@ end
 ---@param col integer
 ---@return LvimBreadcrumbsEntry[]|nil
 function M.chain(bufnr, line, col)
+    local tick = vim.b[bufnr].changedtick
+    local hit = cache[bufnr]
+    if hit and hit.tick == tick and hit.line == line and hit.col == col then
+        return hit.chain
+    end
     local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
     if not ok or not parser then
         return nil
@@ -143,6 +165,9 @@ function M.chain(bufnr, line, col)
     for i = #up, 1, -1 do
         chain[#chain + 1] = up[i]
     end
+    -- Cache only this success path: an empty chain is a valid "no structural ancestors" result and
+    -- is worth memoizing; the earlier nil returns are transient (parser not ready) and are not.
+    cache[bufnr] = { tick = tick, line = line, col = col, chain = chain }
     return chain
 end
 
