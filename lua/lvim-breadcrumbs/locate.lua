@@ -57,6 +57,17 @@ local function pos_le(a, b)
     return a.character <= b.character
 end
 
+--- Position `a` STRICTLY before `b` (line-major, then character).
+---@param a { line: integer, character: integer }
+---@param b { line: integer, character: integer }
+---@return boolean
+local function pos_lt(a, b)
+    if a.line ~= b.line then
+        return a.line < b.line
+    end
+    return a.character < b.character
+end
+
 --- The LAST node (index) in `nodes` (sorted by start) whose start <= `pos`, or nil.
 ---@param nodes LvimBreadcrumbsNode[]
 ---@param pos { line: integer, character: integer }
@@ -102,7 +113,10 @@ local function descend(tree, pos, encoding)
     while level and #level > 0 do
         local i = last_started(level, pos)
         local node = i and level[i]
-        if not node or not pos_le(pos, node.finish) then
+        if not node or not pos_lt(pos, node.finish) then
+            -- finish is the LSP range end (EXCLUSIVE): the cursor sitting exactly on it is already
+            -- past this scope, so require a strict less-than — not pos_le, which would keep the symbol
+            -- highlighted for one column too long.
             break -- the only possible container at this level does not reach the cursor
         end
         chain[#chain + 1] = to_entry(node, encoding)
