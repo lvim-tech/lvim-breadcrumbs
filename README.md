@@ -98,15 +98,15 @@ bc.hud_segment(opts) -- a ready-made lvim-hud chrome winbar segment
 
 `get_data()` returns the ancestor chain at the buffer's cursor, root first. Each entry:
 
-| field         | meaning                                                              |
-| ------------- | -------------------------------------------------------------------- |
-| `name`        | symbol name                                                          |
-| `kind`        | LSP `SymbolKind` number                                              |
-| `type`        | kind name (`"Function"`, `"Class"`, …)                               |
-| `icon`        | the kind glyph (shared lvim-lsp outline set)                         |
-| `hl`          | `LvimBreadcrumbs<KindName>` highlight group                          |
-| `scope_range` | the symbol's full range (`start`/`end`, LSP positions)               |
-| `jump`        | the selection start — where a consumer should place the cursor       |
+| field         | meaning                                                        |
+| ------------- | -------------------------------------------------------------- |
+| `name`        | symbol name                                                    |
+| `kind`        | LSP `SymbolKind` number                                        |
+| `type`        | kind name (`"Function"`, `"Class"`, …)                         |
+| `icon`        | the kind glyph (shared lvim-lsp outline set)                   |
+| `hl`          | `LvimBreadcrumbs<KindName>` highlight group                    |
+| `scope_range` | the symbol's full range (`start`/`end`, LSP positions)         |
+| `jump`        | the selection start — where a consumer should place the cursor |
 
 `get_location(opts)` options (each defaulting to its config value where one exists):
 `bufnr`, `highlight` (embed `%#…#` groups; default `true`), `clicks` (wrap segments in
@@ -143,10 +143,10 @@ All groups derive from the lvim-utils palette and re-theme automatically. One
 `LvimBreadcrumbsClass`, …) with the same accent-per-kind mapping lvim-lsp's outline
 uses, plus:
 
-| group                      | role                                        |
-| -------------------------- | ------------------------------------------- |
-| `LvimBreadcrumbsSeparator` | the `➤` separators and the `…` elision      |
-| `LvimBreadcrumbsFile`      | the `file_prefix` filename                  |
+| group                      | role                                   |
+| -------------------------- | -------------------------------------- |
+| `LvimBreadcrumbsSeparator` | the `➤` separators and the `…` elision |
+| `LvimBreadcrumbsFile`      | the `file_prefix` filename             |
 
 ## Health
 
