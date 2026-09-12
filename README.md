@@ -30,7 +30,7 @@ self-rendered winbar.
 
 ## Requirements
 
-- Neovim >= 0.11
+- Neovim >= 0.12
 - [lvim-utils](https://github.com/lvim-tech/lvim-utils) (palette theming + config merge)
 - Optional: [lvim-lsp](https://github.com/lvim-tech/lvim-lsp) (shared kind-icon table),
   [lvim-icons](https://github.com/lvim-tech/lvim-icons) (the `file_prefix` icon),
