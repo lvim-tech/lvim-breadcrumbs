@@ -1,7 +1,7 @@
 # lvim-breadcrumbs
 
 "Where am I in the code" — the symbol path from the document root to the cursor
-(`module ➤ class ➤ method`), fed by LSP `textDocument/documentSymbol` with a treesitter
+(`module 󰅂 class 󰅂 method`), fed by LSP `textDocument/documentSymbol` with a treesitter
 fallback, exposed as **data** for statusline/winbar consumers plus an optional
 self-rendered winbar.
 
@@ -15,7 +15,7 @@ self-rendered winbar.
   enum / interface / module / field), in the same output shape.
 - **Consumer contract** — `get_data()` is the stable seam: every entry carries `name`,
   `kind` (LSP number), `type` (kind name), `icon`, `hl`, `scope_range` and the jump
-  target. `get_location()` renders the `➤`-separated trail with per-kind highlight
+  target. `get_location()` renders the `󰅂`-separated trail with per-kind highlight
   groups.
 - **lvim-hud integration** — `hud_segment()` returns a ready-made chrome winbar segment:
   drop it into the hud winbar's segment list and the clickable trail renders **inside**
@@ -145,7 +145,7 @@ uses, plus:
 
 | group                      | role                                   |
 | -------------------------- | -------------------------------------- |
-| `LvimBreadcrumbsSeparator` | the `➤` separators and the `…` elision |
+| `LvimBreadcrumbsSeparator` | the `󰅂` separators and the `…` elision |
 | `LvimBreadcrumbsFile`      | the `file_prefix` filename             |
 
 ## Health

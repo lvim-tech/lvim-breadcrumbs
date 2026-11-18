@@ -1,5 +1,5 @@
 -- lvim-breadcrumbs: "where am I in the code" — the symbol path from the document root to the
--- cursor (`module ➤ class ➤ method`), fed by LSP textDocument/documentSymbol with a
+-- cursor (`module 󰅂 class 󰅂 method`), fed by LSP textDocument/documentSymbol with a
 -- treesitter fallback, exposed as DATA for statusline/winbar consumers. This module is the
 -- public entry point and the whole consumer contract:
 --
@@ -8,7 +8,7 @@
 --   is_available(bufnr)     -- can a chain be produced here?
 --   get_data(bufnr)         -- { { name, kind, type, icon, hl, scope_range, jump } } — the
 --                           -- STABLE seam every consumer builds on
---   get_location(opts)      -- the rendered `➤`-separated trail (statusline-format string)
+--   get_location(opts)      -- the rendered `󰅂`-separated trail (statusline-format string)
 --   hud_segment(opts)       -- a ready-made lvim-hud chrome winbar SEGMENT — drop it into
 --                           -- chrome.winbar.segments and the trail renders inside the hud
 --                           -- winbar (per-kind colours + click-to-jump). The recommended
@@ -95,7 +95,7 @@ function M.get_data(bufnr)
     return locate.data(bufnr)
 end
 
---- The rendered breadcrumb trail (statusline-format string, `➤` separators, per-kind
+--- The rendered breadcrumb trail (statusline-format string, `󰅂` separators, per-kind
 --- highlight groups; see LvimBreadcrumbsRenderOpts in render.lua).
 ---@param opts? LvimBreadcrumbsRenderOpts
 ---@return string

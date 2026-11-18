@@ -204,7 +204,7 @@ local NESTED = {
 
 it("plain text is the names, pointer-separated", function()
     local out = rendered(NESTED, 4, 0, { highlight = false, file_prefix = false })
-    eq(2, select(2, out:gsub("➤", "")), "three segments carry two separators")
+    eq(2, select(2, out:gsub("󰅂", "")), "three segments carry two separators")
     truthy(out:match("Outer"), out)
     truthy(out:match("deep"), out)
     eq(nil, out:match("%%#"), "no highlight groups were asked for")

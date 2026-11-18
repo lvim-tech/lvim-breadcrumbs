@@ -15,7 +15,7 @@ CONTENTS                                              *lvim-breadcrumbs*
 1. INTRODUCTION                                 *lvim-breadcrumbs-intro*
 
 lvim-breadcrumbs answers "where am I in the code": the symbol path from the
-document root to the cursor (`module ➤ class ➤ method`), fed by LSP
+document root to the cursor (`module 󰅂 class 󰅂 method`), fed by LSP
 textDocument/documentSymbol with a treesitter fallback, exposed as DATA for
 statusline/winbar consumers plus an optional self-rendered winbar.
 
@@ -68,7 +68,7 @@ get_data({bufnr})
 
                                                 *lvim-breadcrumbs.get_location()*
 get_location({opts})
-    The rendered `➤`-separated trail as a statusline-format string. {opts}
+    The rendered `󰅂`-separated trail as a statusline-format string. {opts}
     (each defaulting to its config value where one exists): `bufnr`,
     `highlight` (embed `%#…#` groups, default true), `clicks` (wrap segments
     in `%N@…@` jump regions — winbar renderers only, default false),
@@ -117,7 +117,7 @@ palette change. One `LvimBreadcrumbs<KindName>` group per LSP SymbolKind
 (LvimBreadcrumbsFunction, LvimBreadcrumbsClass, …), coloured with the same
 accent-per-kind mapping lvim-lsp's outline uses, plus:
 
-  LvimBreadcrumbsSeparator   the `➤` separators and the `…` elision
+  LvimBreadcrumbsSeparator   the `󰅂` separators and the `…` elision
   LvimBreadcrumbsFile        the `file_prefix` filename
 
 The kind glyphs are the same set as lvim-lsp's outline — read live from

@@ -1,7 +1,7 @@
 -- lvim-breadcrumbs.render: chain → rendered breadcrumb string. One builder for every
 -- consumer: get_location(), the lvim-hud chrome segment and the self-rendered winbar all call
 -- location() — a statusline-format string (`%#LvimBreadcrumbs<Kind>#` per segment, names
--- %%-escaped) with ` ➤ ` separators (the canonical pointer), the optional `icon filename`
+-- %%-escaped) with ` 󰅂 ` separators (the canonical pointer), the optional `icon filename`
 -- prefix (lvim-icons) and the depth-limit elision (`…` for the dropped HEAD — the deepest
 -- segments are the informative ones). `highlight = false` strips it down to plain text.
 --
@@ -109,7 +109,7 @@ function M.location(opts)
         segs[#segs + 1] = seg
     end
 
-    return table.concat(segs, paint("LvimBreadcrumbsSeparator", " ➤ ", highlight))
+    return table.concat(segs, paint("LvimBreadcrumbsSeparator", " 󰅂 ", highlight))
 end
 
 --- Mouse dispatch for the `%N@…@` regions: resolve the clicked WINDOW from the mouse, re-read
